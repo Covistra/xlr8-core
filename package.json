@@ -2,6 +2,16 @@
     "name": "@xlr8/core",
     "version": "1.0.0",
     "main": "./src/main.js",
+    "description": "Core components for the XLR8 Micro-Service framework",
+    "author": {
+        "email": "joelgrenon@covistra.com",
+        "name": "Joel Grenon"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Covistra/xlr8-core.git"
+    },
+    "homepage": "https://www.covistra.com/xlr8/home",
     "dependencies": {
         "ajv": "^6.6.1",
         "bunyan": "^1.8.12",
