@@ -38,7 +38,7 @@ class ComponentSelector {
         XLR8.Logger.trace("resolving comp", target.key);
         return Promise.map(loaders, loader => {
             XLR8.Logger.trace("checking loader %s for target", loader.type, target.key);
-            return loader.visitComponents(comp => {
+            return loader.map(comp => {
                 XLR8.Logger.trace("checking matching comp", comp.key, target.key, loader.type);
                 if (comp.key === target.key) {
                     XLR8.Logger.trace("component match for loader %s. %s==%s", loader.type, comp.key, target.key);
@@ -86,9 +86,9 @@ class ComponentSelector {
     }
 }
 
-module.exports = function(proc, opts = {}) {
+module.exports = function (proc, opts = {}) {
 
-    ComponentSelector.prototype.findMatchingKeys = async function(q) {
+    ComponentSelector.prototype.findMatchingKeys = async function (q) {
         let query = q || this._query;
         let supportedLoaders = proc.loaders.filter(loader => loader.supports(this._types));
         let fields = Object.keys(query);
@@ -118,7 +118,7 @@ module.exports = function(proc, opts = {}) {
         }).then(flatten).then(components => Promise.map(components, comp => comp.key));
     }
 
-    ComponentSelector.prototype.wait = async function() {
+    ComponentSelector.prototype.wait = async function () {
         let supportedLoaders = proc.loaders.filter(loader => loader.supports(this._types));
         let keys$;
         if (this._query) {
@@ -148,7 +148,7 @@ module.exports = function(proc, opts = {}) {
         });
     };
 
-    ComponentSelector.prototype.get = async function() {
+    ComponentSelector.prototype.get = async function () {
         let supportedLoaders = proc.loaders.filter(loader => loader.supports(this._types));
 
         let keys$;
@@ -175,7 +175,7 @@ module.exports = function(proc, opts = {}) {
         });
     };
 
-    ComponentSelector.prototype.list = async function() {
+    ComponentSelector.prototype.list = async function () {
         let supportedLoaders = proc.loaders.filter(loader => loader.supports(this._types));
         let keys$;
         if (this._query) {

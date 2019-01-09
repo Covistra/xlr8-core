@@ -16,7 +16,6 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 const get = require('lodash.get');
-const identity = require('lodash.identity');
 
 class Context {
     constructor(ctx) {
@@ -69,81 +68,12 @@ class BaseLoader {
             return comp;
         }));
     }
-    async resolve(deps = []) {
-        this.logger.trace("Resolving deps ", deps);
-        return Promise.map(deps, dep => this.components.find(comp => comp.key === dep).filter(identity));
-    }
     supports(types) {
         if (Array.isArray(types)) {
             return types.indexOf(this.type) !== -1;
         } else {
             return true;
         }
-    }
-    visitComponents(visitor) {
-        return Promise.map(this.components, visitor);
-    }
-    selectComponentsByKey(keys) {
-        return Promise.filter(this.components, comp => keys.indexOf(comp.key) !== -1);
-    }
-    selectComponents(selector) {
-        let fields = Object.keys(selector);
-        if (fields.length === 1 && fields[0] === 'key') {
-            return this.selectComponentsByKey(selector.key);
-        } else {
-            this.logger.trace("%s: Filtering %d components with selector", this.type, this.components.length, selector);
-            return Promise.filter(this.components, async comp => {
-                return Promise.resolve(comp.value).then(val => {
-                    if (val) {
-                        this.logger.debug("Component %s value = ", comp.key, val);
-                        return Promise.reduce(fields, (valid, field) => {
-                            this.logger.trace("filtering on field", field, selector);
-                            if (selector[field] instanceof RegExp) {
-                                this.logger.trace("applying regex to field %s", field, selector[field], valid, val[field]);
-                                return valid && (val[field] && val[field].match(selector[field]));
-                            } else if (field === 'key') {
-                                return valid && selector.key.indexOf(comp.key) !== -1;
-                            } else {
-                                return valid && val[field] === selector[field];
-                            }
-                        }, true);
-                    } else {
-                        return false;
-                    }
-                });
-            });
-        }
-    }
-    _selectComponents(selector) {
-        let fields = Object.keys(selector);
-        this.logger.trace("%s: Filtering %d components with selector", this.type, this.components.length, selector);
-        return Promise.filter(this.components, async comp => {
-            this.logger.trace("filtering component %s", comp.key);
-            return Promise.resolve(comp.value).then(val => {
-                if (val) {
-                    this.logger.trace("found value for component %s", comp.key, val);
-                    if (typeof val.value === 'function') {
-                        this.logger.trace("component %s is indirect. Let's get its value", comp.key);
-                        return val.value().then(val => {
-                            this.logger.trace("async component %s value", comp.key, val);
-                            return Promise.reduce(fields, (valid, field) => {
-                                this.logger.trace("filtering on field", field, selector);
-                                if (selector[field] instanceof RegExp) {
-                                    this.logger.trace("applying regex to field %s", field, selector[field], valid, val[field]);
-                                    return valid & (val[field] && val[field].match(selector[field]));
-                                } else if (field === 'key') {
-                                    return valid & selector.key.indexOf(comp.key) !== -1;
-                                } else {
-                                    return valid & val[field] === selector[field];
-                                }
-                            }, true);
-                        });
-                    } else {}
-                } else {
-                    return false;
-                }
-            });
-        });
     }
     map(fn) {
         return Promise.map(this.components, fn);

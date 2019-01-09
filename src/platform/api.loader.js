@@ -17,12 +17,11 @@
  */
 const Ajv = require('ajv');
 const BaseLoader = require('../base-loader');
-const identity = require('lodash.identity');
 
 const ajv = new Ajv({ schemaId: 'auto' });
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
 
-module.exports = function({ proc, logger, spec }) {
+module.exports = function ({ proc, logger, spec }) {
 
     class ApiLoader extends BaseLoader {
         constructor() {

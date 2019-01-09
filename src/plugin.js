@@ -16,10 +16,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 const Path = require('path');
-const flatten = require('lodash.flatten');
 const glob = require('glob');
 
-module.exports = function() {
+module.exports = function () {
 
     class Plugin {
         constructor(name, rootPath, spec) {
@@ -61,9 +60,6 @@ module.exports = function() {
         lookupFiles(pattern) {
             this._logger.trace("Looking for components %s in %s", pattern, this._rootPath);
             return Promise.fromCallback(cb => glob(pattern, { cwd: this._rootPath, nodir: true, absolute: true }, cb));
-        }
-        resolve(deps, opts) {
-            return Promise.map(this._loaders, loader => loader.resolve(deps, opts)).then(flatten);
         }
     }
 
