@@ -32,7 +32,7 @@ class Endpoint {
     }
 }
 
-module.exports = function() {
+module.exports = function () {
 
     class HttpApi {
         constructor({ port = 3000, proc, logger } = {}) {
@@ -50,7 +50,7 @@ module.exports = function() {
             return this.restart().then(() => endpoint);
         }
         unregisterEndpoint({ key, method, path }) {
-            // FIXME: How to we remove a route from express? 
+            // FIXME: How do we remove a route from express? 
             return Promise.resolve();
         }
         registerEndpoints(endpoints) {

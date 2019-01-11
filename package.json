@@ -1,6 +1,6 @@
 {
     "name": "@xlr8/core",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "main": "./src/main.js",
     "description": "Core components for the XLR8 Micro-Service framework",
     "author": {

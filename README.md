@@ -34,6 +34,7 @@ Once all plugins, loaders and components are loaded and initialized, the process
 Components are located dynamically in all registered source paths (see plugins). It means that service projects can have any kind of physical file structure, as long as files are properly named and contain a single component. For example, a schema loader might look for **/*.schema.js files in all
 source paths. it means that a single loader will be able to load core schemas (from this module), project specific schemas as well as any schemas added by plugins. This offer great flexibility. 
 
+
 ### Resolving dependencies
 
 
@@ -48,3 +49,14 @@ Loaders are special components that can be used to create new kinds of component
 
 The core comes with a number of loaders (schema, api, etc. ) that provides easy to use common components to all services. 
 
+### Creating a component
+
+A component is a simple nodejs module (file) with a specific extension exporting a factory like this: 
+
+```js
+module.exports = function({ proc, logger, context }) {
+    // return your component here
+}
+```
+
+The loader will pass a few components as parameters, including the current process, a component specific logger and
