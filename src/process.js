@@ -20,6 +20,9 @@ const flatten = require('lodash.flatten');
 const serviceFactory = require('./service');
 const EE = require('events').EventEmitter;
 const componentSelectorFactory = require('./component-selector');
+const Yaml = require('js-yaml');
+const fs = require('fs-extra');
+const KubernetesCluster = require('./kubernetes/cluster');
 
 function loadPlugins(process) {
     const plugins = process.packageInfo.xlr8 ? process.packageInfo.xlr8.plugins || [] : [];
@@ -43,11 +46,13 @@ function isObject(obj) {
 }
 
 class Process extends EE {
-    constructor({ packageInfo, rootPath, loadPlugin }) {
+    constructor({ packageInfo, rootPath, loadPlugin, k8s, config }) {
         super();
         this.packageInfo = packageInfo;
         this.rootPath = rootPath;
         this.loadPlugin = loadPlugin;
+        this.cluster = new KubernetesCluster(k8s);
+        this.config = config;
 
         let platformPlugin = platformFactory(packageInfo.xlr8);
         platformPlugin.install(this);
@@ -92,6 +97,13 @@ class Process extends EE {
             selector.keys(...keys);
         }
         return selector;
+    }
+    async readYamlFile(path, encoding = 'utf8') {
+        let content = await fs.readFile(path, encoding);
+        return Yaml.safeLoad(content);
+    }
+    stop() {
+        return Promise.map(this.loaders, loader => loader.stop());
     }
 }
 

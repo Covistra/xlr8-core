@@ -39,7 +39,7 @@ class BaseLoader {
     stop() {
 
     }
-    load(pattern, context, { cstor = false } = {}) {
+    load(pattern, context, { cstor = false, helpers } = {}) {
         return this.proc.resolveFiles(pattern).then(files => {
             this.logger.debug("%s: found %d files", this.type, files.length);
 
@@ -47,9 +47,10 @@ class BaseLoader {
                 this.logger.trace("Loading component %s", file);
                 let value = require(file);
                 let key = XLR8.makeComponentKey(file, this.type);
+                this.logger.trace("Registering component %s", key);
                 if (typeof value === 'function') {
                     let componentLogger = this.logger.child({ type: this.type, key });
-                    return { key, value: value({ proc: this.proc, context: new Context(context), logger: componentLogger, key }) };
+                    return { key, value: value({ helpers, proc: this.proc, context: new Context(context), logger: componentLogger, key }) };
                 } else {
                     return { key, value };
                 }

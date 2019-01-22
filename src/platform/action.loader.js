@@ -15,40 +15,35 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-const Ajv = require('ajv');
 const BaseLoader = require('../base-loader');
 
-const ajv = new Ajv({ schemaId: 'auto' });
-ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
+module.exports = function({ proc, logger, spec }) {
 
-module.exports = function({ proc, logger, query }) {
+    const Action = require('./action')({ proc, logger });
 
-    class SchemaLoader extends BaseLoader {
+    const helpers = {
+        action(key, handler) {
+            return new Action({ key, handler });
+        }
+    };
+
+    class ActionLoader extends BaseLoader {
         constructor() {
-            super(proc, 'schema', logger);
+            super(proc, 'action', logger);
         }
         load() {
-            return super.load("**/*.schema.js");
+            return super.load("**/*.action.js", spec, { helpers });
         }
         async start() {
-            super.start();
-            // Register all our schemas
-            logger.debug("Register %d schemas on startup", this.components.length);
-            const { defaultApi } = await proc.select("defaultApi").type('api').wait();
-            return defaultApi.registerEndpoint({
-                key: 'schemas',
-                method: 'get',
-                path: '/schemas/:schemaRef*',
-                handler: require('./schemas-handler')({ loader: this, logger, proc })
-            }).then(endpoint => logger.info("Schemas served on %s", endpoint.path));
+            logger.debug("Execute all actions schedule to be executed at startup", this.components.length);
+            return Promise.map(this.components, action => Promise.resolve(action.value).then(action => {
+                if (action.onStart) {
+                    return action.execute(proc.config);
+                }
+            }));
         }
-        async stop() {
-            super.start();
-            logger.debug("Unregister %d schemas on shutdown", this.components.length);
-            const { defaultApi } = await proc.select("defaultApi").type('api').wait();
-            return defaultApi.unregisterEndpoint('schemas').then(() => logger.info("Schemas are not served anymore"));
-        }
+        async stop() {}
     }
 
-    return new SchemaLoader();
+    return new ActionLoader();
 }

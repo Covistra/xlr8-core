@@ -53,6 +53,7 @@ class ComponentSelector {
         let result = {};
         return Promise.map(components, comp => {
             if (comp) {
+                XLR8.Logger.trace("component value is", comp);
                 let r = result[comp.key];
                 if (opts.promise) {
                     if (!r) {
@@ -86,9 +87,9 @@ class ComponentSelector {
     }
 }
 
-module.exports = function (proc, opts = {}) {
+module.exports = function(proc, opts = {}) {
 
-    ComponentSelector.prototype.findMatchingKeys = async function (q) {
+    ComponentSelector.prototype.findMatchingKeys = async function(q) {
         let query = q || this._query;
         let supportedLoaders = proc.loaders.filter(loader => loader.supports(this._types));
         let fields = Object.keys(query);
@@ -118,7 +119,7 @@ module.exports = function (proc, opts = {}) {
         }).then(flatten).then(components => Promise.map(components, comp => comp.key));
     }
 
-    ComponentSelector.prototype.wait = async function () {
+    ComponentSelector.prototype.wait = async function() {
         let supportedLoaders = proc.loaders.filter(loader => loader.supports(this._types));
         let keys$;
         if (this._query) {
@@ -128,6 +129,7 @@ module.exports = function (proc, opts = {}) {
         }
 
         return keys$.then(keys => {
+            XLR8.Logger.debug("resolving components using keys", keys);
             this._pendings = keys.map(key => {
                 let pending = { key };
                 pending.$value = new Promise((resolve) => pending.$resolver = resolve);
@@ -136,7 +138,7 @@ module.exports = function (proc, opts = {}) {
 
             let timer = setInterval(() => {
                 let unresolvedPendings = this._pendings.filter(pending => !pending.$value.isFulfilled());
-                XLR8.Logger.trace("Resolving %d missing dependencies...", unresolvedPendings.length);
+                XLR8.Logger.debug("Resolving %d missing dependencies...", unresolvedPendings.length);
                 Promise.map(unresolvedPendings, unresolved => {
                     return this.resolve(unresolved, supportedLoaders);
                 }).catch(err => {
@@ -148,7 +150,7 @@ module.exports = function (proc, opts = {}) {
         });
     };
 
-    ComponentSelector.prototype.get = async function () {
+    ComponentSelector.prototype.get = async function() {
         let supportedLoaders = proc.loaders.filter(loader => loader.supports(this._types));
 
         let keys$;
@@ -175,7 +177,7 @@ module.exports = function (proc, opts = {}) {
         });
     };
 
-    ComponentSelector.prototype.list = async function () {
+    ComponentSelector.prototype.list = async function() {
         let supportedLoaders = proc.loaders.filter(loader => loader.supports(this._types));
         let keys$;
         if (this._query) {

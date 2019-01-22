@@ -32,7 +32,7 @@ class Endpoint {
     }
 }
 
-module.exports = function () {
+module.exports = function() {
 
     class HttpApi {
         constructor({ port = 3000, proc, logger } = {}) {
@@ -61,7 +61,12 @@ module.exports = function () {
         }
         start() {
             this._logger.info("Starting Default API on port %d", this._port);
-            return Promise.fromCallback(cb => this._app.listen(this._port, cb));
+            return Promise.fromCallback(cb => {
+                this._server = this._app.listen(this._port, cb)
+            });
+        }
+        stop() {
+            return Promise.fromCallback(cb => this._server.close(cb));
         }
         restart() {
             return Promise.resolve();
