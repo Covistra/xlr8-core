@@ -129,7 +129,7 @@ module.exports = function(proc, opts = {}) {
         }
 
         return keys$.then(keys => {
-            XLR8.Logger.debug("resolving components using keys", keys);
+            XLR8.Logger.trace("resolving components using keys", keys);
             this._pendings = keys.map(key => {
                 let pending = { key };
                 pending.$value = new Promise((resolve) => pending.$resolver = resolve);
@@ -138,7 +138,7 @@ module.exports = function(proc, opts = {}) {
 
             let timer = setInterval(() => {
                 let unresolvedPendings = this._pendings.filter(pending => !pending.$value.isFulfilled());
-                XLR8.Logger.debug("Resolving %d missing dependencies...", unresolvedPendings.length);
+                XLR8.Logger.trace("Resolving %d missing dependencies...", unresolvedPendings.length);
                 Promise.map(unresolvedPendings, unresolved => {
                     return this.resolve(unresolved, supportedLoaders);
                 }).catch(err => {

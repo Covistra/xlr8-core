@@ -27,6 +27,7 @@
         "lodash.omit": "^4.5.0",
         "lodash.sortby": "^4.7.0",
         "rxjs": "^6.3.3",
-        "rxjs-compat": "^6.3.3"
+        "rxjs-compat": "^6.3.3",
+        "slug": "^0.9.3"
     }
 }

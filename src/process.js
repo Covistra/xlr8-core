@@ -105,6 +105,15 @@ class Process extends EE {
     stop() {
         return Promise.map(this.loaders, loader => loader.stop());
     }
+    async execute(commandKey, params) {
+        XLR8.Logger.debug("executing command %s", `${commandKey}Command`);
+        let command = await this.select(`${commandKey}Command`).type('command').get();
+        if (command) {
+            return command(params);
+        } else {
+            throw new Error("invalid command:" + commandKey);
+        }
+    }
 }
 
 module.exports = Process;
